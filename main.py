@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import re
-import json
 
 app = FastAPI()
 
@@ -19,13 +18,13 @@ def execute(q: str):
     q_lower = q.lower()
 
     # ticket status
-    m = re.search(r"ticket (\d+)", q, re.I)
+    m = re.search(r"ticket\s*(?:id|number|#)?\s*(\d+)", q, re.I)
     if "ticket" in q_lower and "status" in q_lower and m:
         return {
             "name": "get_ticket_status",
-            "arguments": json.dumps({
+            "arguments": {
                 "ticket_id": int(m.group(1))
-            })
+            }
         }
 
     # schedule meeting
@@ -33,11 +32,11 @@ def execute(q: str):
     if "schedule" in q_lower and m:
         return {
             "name": "schedule_meeting",
-            "arguments": json.dumps({
+            "arguments": {
                 "date": m.group(1),
                 "time": m.group(2),
                 "meeting_room": m.group(3)
-            })
+            }
         }
 
     # expense balance
@@ -45,9 +44,9 @@ def execute(q: str):
     if "expense" in q_lower and m:
         return {
             "name": "get_expense_balance",
-            "arguments": json.dumps({
+            "arguments": {
                 "employee_id": int(m.group(1))
-            })
+            }
         }
 
     # performance bonus
@@ -55,10 +54,10 @@ def execute(q: str):
     if "bonus" in q_lower and m:
         return {
             "name": "calculate_performance_bonus",
-            "arguments": json.dumps({
+            "arguments": {
                 "employee_id": int(m.group(1)),
                 "current_year": int(m.group(2))
-            })
+            }
         }
 
     # office issue
@@ -66,14 +65,14 @@ def execute(q: str):
     if "report" in q_lower and m:
         return {
             "name": "report_office_issue",
-            "arguments": json.dumps({
+            "arguments": {
                 "issue_code": int(m.group(1)),
                 "department": m.group(2)
-            })
+            }
         }
 
-    # ⭐ fallback (never break validator)
+    # fallback
     return {
-        "name": "get_ticket_status",
-        "arguments": json.dumps({"ticket_id": 0})
+        "name": "unknown",
+        "arguments": {}
     }
